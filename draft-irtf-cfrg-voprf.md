@@ -326,21 +326,12 @@ application of the group operation `G` with itself `r-1` times, this
 is denoted as `ScalarBaseMult(r)`. The set of scalars corresponds to
 `GF(p)`.
 
+### Mathematical Operations
 We now detail a number of member functions that can be invoked on a
 prime-order group `GG`.
 
 - Order(): Outputs the order of `GG` (i.e. `p`).
 - Identity(): Outputs the identity element of the group (i.e. `I`).
-- HashToGroup(x): A member function of `GG` that deterministically maps
-  an array of bytes `x` to an element of `GG`. The map must ensure that,
-  for any adversary receiving `R = HashToGroup(x)`, it is
-  computationally difficult to reverse the mapping. Examples of hash to
-  group functions satisfying this property are described for prime-order
-  (sub)groups of elliptic curves, see {{!I-D.irtf-cfrg-hash-to-curve}}.
-- HashToScalar(x): A member function of `GG` that deterministically maps
-  an array of bytes `x` to an element in GF(p). A recommended method
-  for its implementation is instantiating the hash to field function,
-  defined in {{!I-D.irtf-cfrg-hash-to-curve}} setting the target field to GF(p).
 - RandomScalar(): A member function of `GG` that chooses at random a
   non-zero element in GF(p).
 - SerializeElement(A): A member function of `GG` that maps a group element `A`
@@ -354,15 +345,30 @@ prime-order group `GG`.
   `buf` to a scalar `s`, or fails if the input is not a valid byte
   representation of a scalar.
 
-Using the API of a prime-order group, we assume the existence of a function
-`GenerateKeyPair()` that generates a random private and public key pair
-(`skS`, `pkS`). One possible implementation might be to compute
-`skS = RandomScalar()` and `pkS = ScalarBaseMult(skS)`. We also assume the
-existence of a `DeriveKeyPair(seed)` function that deterministically generates
-a private and public key pair from input `seed`, where `seed` is a random
-byte string that SHOULD have at least `Ns` bytes of entropy.
-`DeriveKeyPair(seed)` computes `skS = HashToScalar(seed)` and
-`pkS = ScalarBaseMult(skS)`.
+### Cryptographic Operations
+
+Using the API of a prime-order group, we describe the some functions used for
+cryptographic purposes.
+
+- HashToGroup(x): A member function of `GG` that deterministically maps
+  an array of bytes `x` to an element of `GG`. The map must ensure that,
+  for any adversary receiving `R = HashToGroup(x)`, it is
+  computationally difficult to reverse the mapping. Examples of hash to
+  group functions satisfying this property are described for prime-order
+  (sub)groups of elliptic curves, see {{!I-D.irtf-cfrg-hash-to-curve}}.
+- HashToScalar(x): A member function of `GG` that deterministically maps
+  an array of bytes `x` to an element in GF(p). A recommended method
+  for its implementation is instantiating the hash to field function,
+  defined in {{!I-D.irtf-cfrg-hash-to-curve}} setting the target field to GF(p).
+- GenerateKeyPair(): Samples at random a private key `skS`, generates
+  the corresponding public key `pkS`, and returns this key pair. One
+  possible implementation might be to compute `skS = RandomScalar()`
+  and `pkS = ScalarBaseMult(skS)`.
+- DeriveKeyPair(seed): Deterministically generates a private key from a
+  `seed`, which is a random byte string that SHOULD have at least `Ns`
+  bytes of length. Then, it generates the corresponding public key `pkS`,
+  and returns this key pair. One possible implementation might be to
+  compute `skS = HashToScalar(seed)` and `pkS = ScalarBaseMult(skS)`.
 
 It is convenient in cryptographic applications to instantiate such
 prime-order groups using elliptic curves, such as those detailed in
